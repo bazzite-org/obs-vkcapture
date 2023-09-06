@@ -397,35 +397,6 @@ static void activate_client(vkcapture_source_t *ctx, vkcapture_client_t *client,
     client->timeout = clock_ns() + 5000000000; // 5s timeout
 }
 
-static void vkcapture_source_show(void *data)
-{
-    vkcapture_source_t *ctx = data;
-
-    if (ctx->client_id) {
-        pthread_mutex_lock(&server.mutex);
-        vkcapture_client_t *client = find_client_by_id(ctx->client_id);
-        if (client) {
-            activate_client(ctx, client, true);
-        }
-        pthread_mutex_unlock(&server.mutex);
-    }
-}
-
-static void vkcapture_source_hide(void *data)
-{
-    vkcapture_source_t *ctx = data;
-
-    if (ctx->client_id) {
-        pthread_mutex_lock(&server.mutex);
-        vkcapture_client_t *client = find_client_by_id(ctx->client_id);
-        if (client) {
-            activate_client(ctx, client, false);
-            destroy_texture(ctx);
-        }
-        pthread_mutex_unlock(&server.mutex);
-    }
-}
-
 static void vkcapture_source_video_tick(void *data, float seconds)
 {
     vkcapture_source_t *ctx = data;
@@ -646,12 +617,10 @@ static struct obs_source_info vkcapture_input = {
     .id = "vkcapture-source",
     .type = OBS_SOURCE_TYPE_INPUT,
     .get_name = vkcapture_source_get_name,
-    .output_flags = OBS_SOURCE_VIDEO | OBS_SOURCE_CUSTOM_DRAW,
+    .output_flags = OBS_SOURCE_VIDEO | OBS_SOURCE_CUSTOM_DRAW | OBS_SOURCE_DO_NOT_DUPLICATE,
     .create = vkcapture_source_create,
     .destroy = vkcapture_source_destroy,
     .update = vkcapture_source_update,
-    .show = vkcapture_source_show,
-    .hide = vkcapture_source_hide,
     .video_tick = vkcapture_source_video_tick,
     .video_render = vkcapture_source_render,
     .get_width = vkcapture_source_get_width,
