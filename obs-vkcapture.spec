@@ -63,6 +63,7 @@ OBS plugin for Vulkan/OpenGL game capture on Linux
 %cmake_install
 
 %files
+%{_libdir}/obs-plugins/linux-vkcapture.so
 %dir %{_datadir}/obs/obs-plugins/linux-vkcapture/
 %{_datadir}/obs/obs-plugins/linux-vkcapture/*
 %dir %{_datadir}/vulkan/implicit_layer.d/
@@ -80,7 +81,6 @@ OBS plugin for Vulkan/OpenGL game capture on Linux
 %{_bindir}/obs-gamecapture
 %{_bindir}/obs-glcapture
 %{_bindir}/obs-vkcapture
-%{_libdir}/obs-plugins/linux-vkcapture.so
 
 %changelog
 {{{ git_dir_changelog }}}
