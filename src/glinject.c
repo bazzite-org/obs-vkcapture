@@ -111,7 +111,12 @@ static bool gl_init_funcs(bool glx)
         return glx ? glx_f.valid && x11_f.valid : egl_f.valid;
     }
 
-    hlog("Init %s %s", glx ? "GLX" : "EGL", PLUGIN_VERSION);
+    hlog("Init %s %s (%s)", glx ? "GLX" : "EGL", PLUGIN_VERSION,
+#ifdef __x86_64__
+        "64bit");
+#else
+        "32bit");
+#endif
 
     gl_seen = true;
     egl_f.valid = false;
@@ -915,7 +920,7 @@ static bool gl_init(void *display, void *surface)
 
     capture_init_shtex(data.width, data.height, data.buf_fourcc,
             data.buf_strides, data.buf_offsets, data.buf_modifier,
-            data.winid, /*flip*/true, data.nfd, data.buf_fds);
+            data.winid, /*flip*/true, 0, data.nfd, data.buf_fds);
 
     hlog("------------------ opengl capture started ------------------");
 
