@@ -73,7 +73,7 @@ OBS plugin for Vulkan/OpenGL game capture on Linux
 %{_libdir}/libVkLayer_obs_vkcapture.so
 
 %files -n libobs_glcapture
-%{_libdir}/libobs_glcapture.so
+%{_libdir}/obs_glcapture/libobs_glcapture.so
 
 %files -n obs-vkcapture-common
 %license LICENSE
