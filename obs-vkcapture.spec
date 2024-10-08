@@ -19,6 +19,7 @@ BuildRequires:  wayland-devel
 BuildRequires:  pkgconfig(x11)
 
 Requires: obs-vkcapture-common
+Requires: obs-vkcapture-vulkan-layer-common
 Requires: libobs_vkcapture
 Requires: libobs_glcapture
 
@@ -29,6 +30,8 @@ Requires OBS >= 27. On X11 you need to explicitly enable EGL: OBS_USE_EGL=1 obs
 %package -n libobs_vkcapture
 Summary:        Vulkan game capture plugin for OBS Studio
 Provides:       libobs_vkcapture = %{version}
+Requires:       obs-vkcapture-vulkan-layer-common
+Requires:       obs-vkcapture-common
 Version:        %{version}
 
 %description -n libobs_vkcapture
@@ -37,10 +40,19 @@ OBS plugin for Vulkan/OpenGL game capture on Linux
 %package -n libobs_glcapture
 Summary:        OpenGL game capture plugin for OBS Studio
 Provides:       libobs_glcapture = %{version}
+Requires:       obs-vkcapture-common
 Version:        %{version}
 
 %description -n libobs_glcapture
 OBS plugin for Vulkan/OpenGL game capture on Linux
+
+%package -n obs-vkcapture-vulkan-layer-common
+Summary:        OpenGL game capture plugin for OBS Studio
+Provides:       obs-vkcapture-vulkan-layer-common = %{version}
+Version:        %{version}
+
+%description -n obs-vkcapture-vulkan-layer-common
+Common files for Vulkan Layers powering game capture on Linux
 
 %package -n obs-vkcapture-common
 Summary:        OpenGL game capture plugin for OBS Studio
@@ -66,6 +78,8 @@ OBS plugin for Vulkan/OpenGL game capture on Linux
 %{_libdir}/obs-plugins/linux-vkcapture.so
 %dir %{_datadir}/obs/obs-plugins/linux-vkcapture/
 %{_datadir}/obs/obs-plugins/linux-vkcapture/*
+
+%files -n obs-vkcapture-vulkan-layer-common
 %dir %{_datadir}/vulkan/implicit_layer.d/
 %{_datadir}/vulkan/implicit_layer.d/obs_vk*.json
 
