@@ -563,7 +563,7 @@ static void vkcapture_source_render(void *data, gs_effect_t *effect)
     }
 
     const enum gs_color_space color_space = gs_get_color_space();
-    const char *tech_name = "Draw";
+    const char *tech_name = "DrawSrgbDecompress";
     float multiplier = 1.f;
 
     if (color_space == GS_CS_709_EXTENDED) {
@@ -573,8 +573,15 @@ static void vkcapture_source_render(void *data, gs_effect_t *effect)
 
     effect = obs_get_base_effect(ctx->allow_transparency ? OBS_EFFECT_DEFAULT : OBS_EFFECT_OPAQUE);
 
+    const bool linear_srgb = gs_get_linear_srgb();
+    const bool previous = gs_framebuffer_srgb_enabled();
+    gs_enable_framebuffer_srgb(linear_srgb);
+
     gs_eparam_t *image = gs_effect_get_param_by_name(effect, "image");
-    gs_effect_set_texture(image, ctx->texture);
+    if (linear_srgb)
+        gs_effect_set_texture_srgb(image, ctx->texture);
+    else
+        gs_effect_set_texture(image, ctx->texture);
 
     while (gs_effect_loop(effect, tech_name)) {
         gs_effect_set_float(gs_effect_get_param_by_name(effect, "multiplier"), multiplier);
@@ -597,6 +604,8 @@ static void vkcapture_source_render(void *data, gs_effect_t *effect)
             cursor_render(ctx);
         }
     }
+
+    gs_enable_framebuffer_srgb(previous);
 }
 
 static const char *vkcapture_source_get_name(void *data)
@@ -690,7 +699,7 @@ static struct obs_source_info vkcapture_input = {
     .id = "vkcapture-source",
     .type = OBS_SOURCE_TYPE_INPUT,
     .get_name = vkcapture_source_get_name,
-    .output_flags = OBS_SOURCE_VIDEO | OBS_SOURCE_CUSTOM_DRAW | OBS_SOURCE_DO_NOT_DUPLICATE,
+    .output_flags = OBS_SOURCE_VIDEO | OBS_SOURCE_CUSTOM_DRAW | OBS_SOURCE_DO_NOT_DUPLICATE | OBS_SOURCE_SRGB,
     .create = vkcapture_source_create,
     .destroy = vkcapture_source_destroy,
     .update = vkcapture_source_update,
