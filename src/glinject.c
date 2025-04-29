@@ -894,11 +894,13 @@ static bool gl_shtex_init()
             hlog("Failed to create EGL image");
             goto fail;
         }
-        const int queried = egl_f.ExportDMABUFImageQueryMESA(data.display, data.image, &data.buf_fourcc, &data.nfd, &data.buf_modifier);
+        uint64_t modifiers[4];
+        const int queried = egl_f.ExportDMABUFImageQueryMESA(data.display, data.image, &data.buf_fourcc, &data.nfd, modifiers);
         if (!queried) {
             hlog("Failed to query dmabuf export");
             goto fail;
         }
+        data.buf_modifier = modifiers[0];
         const int exported = egl_f.ExportDMABUFImageMESA(data.display, data.image, data.buf_fds, data.buf_strides, data.buf_offsets);
         if (!exported) {
             hlog("Failed dmabuf export");
