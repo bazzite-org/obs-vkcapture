@@ -563,7 +563,8 @@ static void vkcapture_source_render(void *data, gs_effect_t *effect)
     }
 
     const enum gs_color_space color_space = gs_get_color_space();
-    const char *tech_name = "DrawSrgbDecompress";
+    const bool linear_srgb = gs_get_linear_srgb();
+    const char *tech_name = linear_srgb ? "DrawSrgbDecompress" : "Draw";
     float multiplier = 1.f;
 
     if (color_space == GS_CS_709_EXTENDED) {
@@ -573,7 +574,6 @@ static void vkcapture_source_render(void *data, gs_effect_t *effect)
 
     effect = obs_get_base_effect(ctx->allow_transparency ? OBS_EFFECT_DEFAULT : OBS_EFFECT_OPAQUE);
 
-    const bool linear_srgb = gs_get_linear_srgb();
     const bool previous = gs_framebuffer_srgb_enabled();
     gs_enable_framebuffer_srgb(linear_srgb);
 
