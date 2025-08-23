@@ -228,6 +228,13 @@ static bool gl_init_funcs(bool glx)
     GETGLPROCADDR(TexStorageMem2DEXT);
     GETGLPROCADDR(IsMemoryObjectEXT);
 
+    // Always use Vulkan capture with zink
+    const char *renderer = (const char *)gl_f.GetString(GL_RENDERER);
+    if (strncmp(renderer, "zink", 4) == 0) {
+        hlog("GL capture disabled with zink");
+        return true;
+    }
+
     data.valid = true;
 
     return true;
