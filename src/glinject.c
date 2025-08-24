@@ -228,13 +228,6 @@ static bool gl_init_funcs(bool glx)
     GETGLPROCADDR(TexStorageMem2DEXT);
     GETGLPROCADDR(IsMemoryObjectEXT);
 
-    // Always use Vulkan capture with zink
-    const char *renderer = (const char *)gl_f.GetString(GL_RENDERER);
-    if (strncmp(renderer, "zink", 4) == 0) {
-        hlog("GL capture disabled with zink");
-        return true;
-    }
-
     data.valid = true;
 
     return true;
@@ -838,7 +831,7 @@ static bool gl_shtex_init()
     if (data.glx) {
         // GLX on NVIDIA is all kinds of broken...
         const char *vendor = (const char*)gl_f.GetString(GL_VENDOR);
-        if (strcmp(vendor, "NVIDIA Corporation") == 0) {
+        if (vendor && strcmp(vendor, "NVIDIA Corporation") == 0) {
             return false;
         }
     }
@@ -983,8 +976,34 @@ static bool gl_init(void *display, void *surface)
     return true;
 }
 
+static bool gl_capture_disabled()
+{
+    static int disabled = 0;
+
+    if (disabled != 0) {
+        return disabled == 1;
+    }
+
+    disabled = 1;
+
+    // Always use Vulkan capture with zink
+    const char *renderer = (const char *)gl_f.GetString(GL_RENDERER);
+    if (renderer && strncmp(renderer, "zink", 4) == 0) {
+        hlog("GL capture disabled with zink");
+        return true;
+    }
+
+    disabled = -1;
+    return false;
+}
+
 static void gl_capture(void *display, void *surface)
 {
+    if (gl_capture_disabled()) {
+        data.valid = false;
+        return;
+    }
+
     capture_update_socket();
 
     if (capture_should_stop()) {
