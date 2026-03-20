@@ -38,6 +38,8 @@ For capturing games outside Flatpak runtime, you need native build regardless of
 2. Start the game with capture enabled `obs-gamecapture %command%`.
 3. (Recommended) Start the game with only Vulkan capture enabled `env OBS_VKCAPTURE=1 %command%`.
 
+To change the game name that is displayed in OBS Source properties, set `OBS_VKCAPTURE_NAME=custom_name_here`.
+
 ## Troubleshooting
 
 **NVIDIA**
