@@ -57,6 +57,11 @@ static bool get_wine_exe(char *buf, size_t bufsize)
 
 static bool get_exe(char *buf, size_t bufsize)
 {
+    char *custom_name = getenv("OBS_VKCAPTURE_NAME");
+    if (custom_name) {
+        strncpy(buf, custom_name, bufsize);
+        return true;
+    }
     char exe[PATH_MAX];
     ssize_t n = readlink("/proc/self/exe", exe, PATH_MAX);
     if (n <= 0) {
