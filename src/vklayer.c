@@ -1289,9 +1289,10 @@ static VkResult VKAPI_CALL OBS_CreateInstance(const VkInstanceCreateInfo *info,
     for (uint32_t i = 0; i < req_extensions_count; ++i) {
         exts[info->enabledExtensionCount + i] = req_extensions[i];
     }
-    VkInstanceCreateInfo *i = (VkInstanceCreateInfo*)info;
-    i->enabledExtensionCount = new_count;
-    i->ppEnabledExtensionNames = exts;
+
+    VkInstanceCreateInfo create_info = *info;
+    create_info.enabledExtensionCount = new_count;
+    create_info.ppEnabledExtensionNames = exts;
 
     /* -------------------------------------------------------- */
     /* step through chain until we get to the link info         */
@@ -1302,6 +1303,7 @@ static VkResult VKAPI_CALL OBS_CreateInstance(const VkInstanceCreateInfo *info,
     }
 
     if (lici == NULL) {
+        free(exts);
         return VK_ERROR_INITIALIZATION_FAILED;
     }
 
@@ -1317,15 +1319,18 @@ static VkResult VKAPI_CALL OBS_CreateInstance(const VkInstanceCreateInfo *info,
     /* allocate data node                                       */
 
     struct vk_inst_data *idata = alloc_inst_data(ac);
-    if (!idata)
+    if (!idata) {
+        free(exts);
         return VK_ERROR_OUT_OF_HOST_MEMORY;
+    }
 
     /* -------------------------------------------------------- */
     /* create instance                                          */
 
     PFN_vkCreateInstance create = (PFN_vkCreateInstance)gpa(NULL, "vkCreateInstance");
 
-    VkResult res = create(info, ac, p_inst);
+    VkResult res = create(&create_info, ac, p_inst);
+    free(exts);
 #ifndef NDEBUG
     hlog("CreateInstance %s", result_to_str(res));
 #endif
@@ -1448,9 +1453,10 @@ static VkResult VKAPI_CALL OBS_CreateDevice(VkPhysicalDevice phy_device,
     for (uint32_t i = 0; i < req_extensions_count; ++i) {
         exts[info->enabledExtensionCount + i] = req_extensions[i];
     }
-    VkDeviceCreateInfo *i = (VkDeviceCreateInfo*)info;
-    i->enabledExtensionCount = new_count;
-    i->ppEnabledExtensionNames = exts;
+
+    VkDeviceCreateInfo create_info = *info;
+    create_info.enabledExtensionCount = new_count;
+    create_info.ppEnabledExtensionNames = exts;
 
     VkResult ret = VK_ERROR_INITIALIZATION_FAILED;
 
@@ -1464,6 +1470,7 @@ static VkResult VKAPI_CALL OBS_CreateDevice(VkPhysicalDevice phy_device,
     }
 
     if (!ldci) {
+        free(exts);
         return ret;
     }
 
@@ -1482,8 +1489,10 @@ static VkResult VKAPI_CALL OBS_CreateDevice(VkPhysicalDevice phy_device,
     /* allocate data node                                       */
 
     data = alloc_device_data(ac);
-    if (!data)
+    if (!data) {
+        free(exts);
         return VK_ERROR_OUT_OF_HOST_MEMORY;
+    }
 
     init_obj_list(&data->queues);
     data->graphics_queue = VK_NULL_HANDLE;
@@ -1494,7 +1503,8 @@ static VkResult VKAPI_CALL OBS_CreateDevice(VkPhysicalDevice phy_device,
     PFN_vkCreateDevice createFunc =
         (PFN_vkCreateDevice)gipa(idata->instance, "vkCreateDevice");
 
-    ret = createFunc(phy_device, info, ac, p_device);
+    ret = createFunc(phy_device, &create_info, ac, p_device);
+    free(exts);
 #ifndef NDEBUG
     hlog("CreateDevice %s", result_to_str(ret));
 #endif
